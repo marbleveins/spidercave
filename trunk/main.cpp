@@ -2,7 +2,6 @@
 #include <fstream>
 #include "Scenario.h"
 #include "ScenarioViewer.h"
-#include "PlayerViewer.h"
 #include "Player.h"
 
 #define SCREENWIDTH 320
@@ -36,9 +35,8 @@ int main()
     std::vector <std::string> levels;
     levels = getLevels();
     Scenario *scenario = new Scenario(0, levels[0]);
-    Player *player = new Player();
+    Player *player = new Player(scenario);
     ScenarioViewer *scenarioViewer = new ScenarioViewer(scenario);
-    PlayerViewer *playerViewer = new PlayerViewer(player);
 
     sf::Clock clock;
     float frames = 1000/60;
@@ -61,24 +59,19 @@ int main()
                 int id = 0;
                 int levelsAmount = levels.size()-1;
                 if (scenario->currentLevelId < levelsAmount)
-                    id = (*scenario).currentLevelId+1;
+                    id = scenario->currentLevelId+1;
 
                 //delete scenario->Enemys? todo va en el destructor
                 delete player;
-                player = new Player();
+                player = new Player(scenario);
                 delete scenario;
                 scenario = new Scenario(id, levels[id]);
                 delete scenarioViewer;
                 scenarioViewer = new ScenarioViewer(scenario);
-                delete playerViewer;
-                playerViewer = new PlayerViewer(player);
             }
 
             scenarioViewer->draw(&gameWindow);
-            player->colission(scenario);
-            player->move(scenario->gravity);
-            playerViewer->update(player);
-            playerViewer->draw(&gameWindow, player);
+            player->update(&gameWindow);
             gameWindow.display();
             clock.restart();
         }
