@@ -9,8 +9,9 @@ class Player
         Player(Scenario *p_scenario);
         void moveAsKeyBoard(float _gravity);
         void colission();
+        bool feetOnFloor();
         void update(sf::RenderWindow *gameWindow);
-
+        int currentAnimSize();
         Scenario *currentScenario;
 
         float xPos;
@@ -22,6 +23,9 @@ class Player
         float resistance;
         sf::String direction;
         sf::Sprite sprite;
+        int animFrame;//0 a 7 - o la cantidad de frames que haya
+        double animTimeCounter;
+        sf::Clock clock;
 
         enum states {
             Standing=0,
@@ -30,7 +34,7 @@ class Player
         };
 
         void draw(sf::RenderWindow *gameWindow);
-        void updateView();
+        void updateTex();
 
     private:
         std::vector <sf::Texture> getTiles(int line);
