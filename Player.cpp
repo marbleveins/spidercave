@@ -8,12 +8,14 @@ Player::Player(Scenario *p_scenario)
 {
     //ctor
     state = Standing;
-    xPos = 100;
-    yPos = 100;
+    xPos = 23;
+    yPos = 210;
     velocityX = 0;
     velocityY = 0;
-    acceleration = 1;
+    acceleration = 1.5;
     resistance = 0;
+    animFrame = 1;
+    animTimeCounter = 0;
 
     playerFileName = "playerset.png";
     TEXvectorStand = getTiles(1);
@@ -27,33 +29,40 @@ void Player::update(sf::RenderWindow *gameWindow)
 {
     moveAsKeyBoard(currentScenario->gravity);
     colission();
-    updateView();
+    updateTex();
     draw(gameWindow);
 }
 
 void Player::moveAsKeyBoard(float _gravity)
 {
-    velocityY += _gravity;
+    bool feetsOnFloor = feetOnFloor();
+    if (feetsOnFloor == false)
+        velocityY += _gravity;
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-    {
-        velocityY = -2;
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-    {
-    }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
     {
         velocityX = -acceleration;
-        state = Running;
+        if (feetsOnFloor) state = Running;
     }
-    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
     {
         velocityX = acceleration;
-        state = Running;
-    }else
+        if (feetsOnFloor) state = Running;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) == false
+        && sf::Keyboard::isKeyPressed(sf::Keyboard::D) == false)
     {
         velocityX = 0;
+        if (feetsOnFloor) state = Standing;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+    {
+        if (state != Jumping)
+        {
+            velocityY = -4;
+            state = Jumping;
+        }
     }
 
     yPos += velocityY;
@@ -62,25 +71,34 @@ void Player::moveAsKeyBoard(float _gravity)
 
 void Player::colission()
 {
-     while ( currentScenario->getTileCode(xPos, yPos+20) == 2
-            || currentScenario->getTileCode(xPos, yPos+20) == 5
-            || currentScenario->getTileCode(xPos, yPos+20) == 6
-            || currentScenario->getTileCode(xPos, yPos+20) == 7)
+    int tileCode = currentScenario->getTileCode(xPos+PLAYERSIZE/2, yPos+PLAYERSIZE-12);// -12 el tile pisable tiene una parte negra arriba entonces se reduce para que pise el piso del dibujo
+    while ( tileCode == 2 || tileCode == 5 || tileCode == 6 || tileCode == 7)
     {
         yPos--;
         velocityY = 0;
+        tileCode = currentScenario->getTileCode(xPos+PLAYERSIZE/2, yPos+PLAYERSIZE-12);
     }
-    if (yPos+35 >= 450)
+    if (yPos+16 >= 450)
     {
-        yPos = 100;
+        xPos = 23;
+        yPos = 210;
         velocityY = 0;
     }
-    if (xPos <= 17 || xPos+35 >= 315)
+    if (xPos <= 16 || xPos+16 >= 315)
     {
-        xPos = 100;
+        xPos = 23;
+        yPos = 210;
+        velocityY = 0;
     }
 }
+bool Player::feetOnFloor()
+{
+    int tileCode = currentScenario->getTileCode(xPos+PLAYERSIZE/2, yPos+PLAYERSIZE-12 +1);//no sacar el +1 porque empieza a rebotar
+    if (tileCode == 2 || tileCode == 5 || tileCode == 6 || tileCode == 7)
+        return true;
 
+    return false;
+}
 std::vector <sf::Texture> Player::getTiles(int line)
 {
     std::vector <sf::Texture> result;
@@ -133,25 +151,76 @@ bool Player::validateIMG(sf::Image img, sf::Color backColor)
     return false;
 }
 
-void Player::updateView()
+void Player::updateTex()
 {
     if (state == Standing)
     {
-        sprite.setTexture(TEXvectorStand[0]);
+        sprite.setTexture(TEXvectorStand[animFrame-1]);
     }
     else if (state == Running)
     {
-        sprite.setTexture(TEXvectorRun[0]);
+        sprite.setTexture(TEXvectorRun[animFrame-1]);
     }
     else if (state == Jumping)
     {
-        sprite.setTexture(TEXvectorJump[0]);
+        sprite.setTexture(TEXvectorJump[animFrame-1]);
     }
+
+    if (clock.getElapsedTime() >= sf::milliseconds(250/acceleration) )
+    {
+        animFrame ++;
+        clock.restart();
+    }
+    if ( animFrame > currentAnimSize() )
+        animFrame = 1;
 
     sprite.setPosition(xPos, yPos);
 }
-
+int Player::currentAnimSize()
+{
+    switch (state)
+    {
+    case Standing:
+        return int( TEXvectorStand.size() );
+        break;
+    case Running:
+        return int( TEXvectorRun.size() );
+        break;
+    case Jumping:
+        return int( TEXvectorJump.size() );
+        break;
+    }
+    return 1;
+}
 void Player::draw(sf::RenderWindow *gameWindow)
 {
     gameWindow->draw(sprite);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
