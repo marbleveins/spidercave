@@ -15,6 +15,7 @@ Scenario::Scenario(int levelId, std::string levelName)
     currentLevelId = levelId;
     currentLevelName = levelName;
     currentMap = getMap(currentLevelName);
+    collisionPoint = getCollisionPoints();
 }
 
 
@@ -60,3 +61,53 @@ int Scenario::getTileCode(int x, int y)
 
     return (currentMap[yTile])[xTile];
 }
+
+std::map<int, std::map<int,int> > Scenario::getCollisionPoints()
+{
+    std::map<int, std::map<int,int> > result;
+    for (std::vector<std::vector<int> >::iterator itl=currentMap.begin(); itl < currentMap.end(); ++itl)
+    {
+        int l = itl - currentMap.begin();// l es el index del currentMap actual
+        for (std::vector<int>::iterator itc=itl->begin(); itc < itl->end(); ++itc)
+        {
+            int c = itc - itl->begin();// c es el index del del mapa en el iterator itL
+            //uno para cada tipo de tile? no jodas, RE-IMPLEMENTAR
+            //tiles inatravesables
+            if ( currentMap[l][c] == 1 || currentMap[l][c] == 4 || currentMap[l][c] == 8)
+            {
+                for (int y=0; y < TILESIZE; y++)
+                {
+                    for (int x=0; x < TILESIZE; x++)
+                    {
+                        result[y+(l*TILESIZE)][x+(c*TILESIZE)] = 1;
+                        //result[x+(l*TILESIZE)].insert(std::make_pair( y+(c*TILESIZE), 1 ));
+                    }
+                }
+
+            }
+            //tiles con piso 12 pixels debajo del top
+            if ( currentMap[l][c] == 2 || currentMap[l][c] == 3 || currentMap[l][c] == 5 || currentMap[l][c] == 6 || currentMap[l][c] == 7)
+            {
+                for (int y=12; y < TILESIZE; y++)
+                {
+                    for (int x=0; x < TILESIZE; x++)
+                    {
+                        result[y+(l*TILESIZE)][x+(c*TILESIZE)] = 1;
+                    }
+                }
+            }
+        }
+    }
+    return result;
+}
+
+bool Scenario::collides(int x, int y)
+{
+    if (collisionPoint[x][y] == 1)
+        return true;
+    return false;
+}
+
+
+
+
