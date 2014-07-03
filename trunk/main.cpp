@@ -39,8 +39,8 @@ int main()
     ScenarioViewer *scenarioViewer = new ScenarioViewer(scenario);
 
     sf::Clock clock;
-    float frames = 1000/60;
-
+    float frames = 60.f;
+    sf::Clock slowMotionClock;
 
     while(gameWindow.isOpen())
     {
@@ -51,9 +51,19 @@ int main()
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
             gameWindow.close();
 
-
-        if (clock.getElapsedTime() >= sf::milliseconds(frames) )
+        if ( sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && slowMotionClock.getElapsedTime() >= sf::milliseconds(300) )
         {
+            if (frames == 60)
+                frames = 4;
+            else
+                frames = 60;
+            slowMotionClock.restart();
+        }
+
+        if (clock.getElapsedTime() >= sf::milliseconds(1000.f/frames) )
+        {
+
+
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::N))
             {
                 int id = 0;
@@ -62,12 +72,13 @@ int main()
                     id = scenario->currentLevelId+1;
 
                 //delete scenario->Enemys? todo va en el destructor
-                delete player;
-                player = new Player(scenario);
+
                 delete scenario;
                 scenario = new Scenario(id, levels[id]);
                 delete scenarioViewer;
                 scenarioViewer = new ScenarioViewer(scenario);
+                delete player;
+                player = new Player(scenario);
             }
 
             scenarioViewer->draw(&gameWindow);

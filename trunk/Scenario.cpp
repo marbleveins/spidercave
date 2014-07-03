@@ -11,7 +11,7 @@
 Scenario::Scenario(int levelId, std::string levelName)
 {
     //ctor
-    gravity = 0.2;
+    gravity = 0.3;
     currentLevelId = levelId;
     currentLevelName = levelName;
     currentMap = getMap(currentLevelName);
@@ -64,6 +64,9 @@ int Scenario::getTileCode(int x, int y)
 
 std::map<int, std::map<int,int> > Scenario::getCollisionPoints()
 {
+    /**
+    *   uno para cada tipo de tile? no jodas, RE-IMPLEMENTAR
+    **/
     std::map<int, std::map<int,int> > result;
     for (std::vector<std::vector<int> >::iterator itl=currentMap.begin(); itl < currentMap.end(); ++itl)
     {
@@ -71,28 +74,83 @@ std::map<int, std::map<int,int> > Scenario::getCollisionPoints()
         for (std::vector<int>::iterator itc=itl->begin(); itc < itl->end(); ++itc)
         {
             int c = itc - itl->begin();// c es el index del del mapa en el iterator itL
-            //uno para cada tipo de tile? no jodas, RE-IMPLEMENTAR
-            //tiles inatravesables
-            if ( currentMap[l][c] == 1 || currentMap[l][c] == 4 || currentMap[l][c] == 8)
+
+            //tiles completamente Solidos
+            //Y PAREDES DERECHA XQ EL PERSONAJE TENDRIA QUE QUEDAR DETRAS DE LA PARED Y SE DIBUJA DSPS...
+            if ( currentMap[l][c] == 1)
             {
-                for (int y=0; y < TILESIZE; y++)
+                for (int x=0; x < TILESIZE; x++)
                 {
-                    for (int x=0; x < TILESIZE; x++)
+                    for (int y=0; y < TILESIZE; y++)
                     {
-                        result[y+(l*TILESIZE)][x+(c*TILESIZE)] = 1;
+                        result[x+(c*TILESIZE)][y+(l*TILESIZE)] = 1;//!=0
                         //result[x+(l*TILESIZE)].insert(std::make_pair( y+(c*TILESIZE), 1 ));
                     }
                 }
 
             }
-            //tiles con piso 12 pixels debajo del top
-            if ( currentMap[l][c] == 2 || currentMap[l][c] == 3 || currentMap[l][c] == 5 || currentMap[l][c] == 6 || currentMap[l][c] == 7)
+            //tiles esquinero derecha abajo
+            if ( currentMap[l][c] == 3)
             {
-                for (int y=12; y < TILESIZE; y++)
+                for (int x=8; x < TILESIZE; x++)
                 {
-                    for (int x=0; x < TILESIZE; x++)
+                    for (int y=11; y < TILESIZE; y++)
                     {
-                        result[y+(l*TILESIZE)][x+(c*TILESIZE)] = 1;
+                        result[x+(c*TILESIZE)][y+(l*TILESIZE)] = 1;//!=0
+                        //result[x+(l*TILESIZE)].insert(std::make_pair( y+(c*TILESIZE), 1 ));
+                    }
+                }
+
+            }
+            //tiles esquina caida derecha abajo
+            if ( currentMap[l][c] == 7)
+            {
+                for (int x=0; x < 8; x++)
+                {
+                    for (int y=11; y < TILESIZE; y++)
+                    {
+                        result[x+(c*TILESIZE)][y+(l*TILESIZE)] = 1;//!=0
+                        //result[x+(l*TILESIZE)].insert(std::make_pair( y+(c*TILESIZE), 1 ));
+                    }
+                }
+
+            }
+            //tiles d
+            //tiles de esquina caida izquierda abajo
+            if ( currentMap[l][c] == 5 || currentMap[l][c] == 6)
+            {
+                for (int x=8; x < TILESIZE; x++)
+                {
+                    for (int y=11; y < TILESIZE; y++)
+                    {
+                        result[x+(c*TILESIZE)][y+(l*TILESIZE)] = 1;//!=0
+                        //result[x+(l*TILESIZE)].insert(std::make_pair( y+(c*TILESIZE), 1 ));
+                    }
+                }
+
+            }
+            //tiles de pared derecha - cuack, leer Solidos
+            //tiles de pared izquierda
+            if ( currentMap[l][c] == 4)
+            {
+                for (int x=8; x < TILESIZE; x++)
+                {
+                    for (int y=0; y < TILESIZE; y++)
+                    {
+                        result[x+(c*TILESIZE)][y+(l*TILESIZE)] = 1;//!=0
+                        //result[x+(l*TILESIZE)].insert(std::make_pair( y+(c*TILESIZE), 1 ));
+                    }
+                }
+
+            }
+            //tiles de piso 12 pixels debajo del top
+            if ( currentMap[l][c] == 2)
+            {
+                for (int x=0; x < TILESIZE; x++)
+                {
+                    for (int y=11; y < TILESIZE; y++)
+                    {
+                        result[x+(c*TILESIZE)][y+(l*TILESIZE)] = 1;//!=0
                     }
                 }
             }
@@ -103,7 +161,7 @@ std::map<int, std::map<int,int> > Scenario::getCollisionPoints()
 
 bool Scenario::collides(int x, int y)
 {
-    if (collisionPoint[x][y] == 1)
+    if (collisionPoint[x][y] != 0)
         return true;
     return false;
 }
