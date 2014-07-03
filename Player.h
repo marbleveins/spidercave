@@ -8,7 +8,6 @@ class Player
     public:
         Player(Scenario *p_scenario);
         void moveAsKeyBoard(float _gravity);
-        void collision();
         bool feetOnFloor();
         void update(sf::RenderWindow *gameWindow);
         int currentAnimSize();
@@ -25,7 +24,6 @@ class Player
 
         float jumpStartSpeedY;
         bool jumping, jumpKeyDown;
-        int iterations;
         int state;
         sf::String direction;
         sf::Sprite sprite;
