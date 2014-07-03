@@ -13,6 +13,9 @@ class Scenario
         float gravity;
 
         int getTileCode(int x, int y);
+        std::map<int, std::map<int,int> > collisionPoint;//hash_map - es un diccionario con un diccionario adentro
+        std::map<int, std::map<int,int> > getCollisionPoints();
+        bool collides(int x, int y);
 
 
     private:
